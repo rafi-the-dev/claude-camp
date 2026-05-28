@@ -1,0 +1,18 @@
+{
+  "name": "claude-camp",
+  "version": "0.1.0",
+  "description": "Claude Autonomous Memory Pipeline — persistent LLM knowledge base using Obsidian",
+  "bin": {
+    "camp": "./bin/camp.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "assets/"
+  ],
+  "keywords": ["obsidian", "claude", "wiki", "knowledge-base", "llm", "camp"],
+  "license": "GPL-3.0",
+  "engines": {
+    "node": ">=18"
+  }
+}
