@@ -3,9 +3,6 @@
 const { init } = require('../lib/init');
 const { showConfig } = require('../lib/config');
 const { doctor } = require('../lib/obsidian');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -13,7 +10,10 @@ const flags = args.filter(a => a.startsWith('--'));
 
 switch (command) {
   case 'init':
-    init({ yes: flags.includes('--yes') || flags.includes('-y') });
+    init({
+      yes: flags.includes('--yes') || flags.includes('-y'),
+      split: flags.includes('--split') || flags.includes('-s'),
+    });
     break;
   case 'config':
     showConfig();
@@ -28,14 +28,16 @@ switch (command) {
 camp — Claude Autonomous Memory Pipeline
 
 Usage:
-  camp init         Interactive setup
-  camp init --yes   Non-interactive (use defaults)
-  camp config       View current configuration
-  camp doctor       Check system health
+  camp init           Interactive setup
+  camp init --yes     Non-interactive (use defaults, merge mode)
+  camp init --split   Non-interactive (use defaults, split mode)
+  camp config         View current configuration
+  camp doctor         Check system health
 
 Options:
-  -y, --yes   Use defaults (non-interactive)
-  -h, --help  Show this help
+  -y, --yes    Use defaults (non-interactive)
+  -s, --split  Split mode: wiki section in ~/CAMP.md, reference in ~/CLAUDE.md
+  -h, --help   Show this help
 `);
     break;
   default:

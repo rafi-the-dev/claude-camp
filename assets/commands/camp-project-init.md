@@ -39,7 +39,9 @@ Create ONE page: `obsidian create path="projects/[project-name]" content="..."`
 Then update my-projects hub:
 Run: `obsidian read path="projects/my-projects.md"`
 Add under "## Active Projects":
-`- [[projects/[project-name]]] — one-line description`
+`- [[projects/[project-name]]] — one-line description → /absolute/path/to/project/project_wiki/`
+
+The `→` arrow followed by the project_wiki path lets you quickly locate and read project context from the hub page.
 
 ## Step 4 — Present summary
 
@@ -52,7 +54,7 @@ Add under "## Active Projects":
 **Main wiki:** [[projects/[project-name]]] created from [[projects/_template]]
 Added under [[projects/my-projects]]
 
-Run `/wiki-resume` at the start of future sessions to load context.
+Run `/camp-resume` at the start of future sessions to load context.
 ```
 
 ## Important Rules

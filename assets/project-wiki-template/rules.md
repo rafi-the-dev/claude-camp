@@ -17,8 +17,8 @@ updated: YYYY-MM-DD
 
 ## While Working
 - Update the relevant files (see [project.md](project.md) for all links)
-- Run `/bug <error>` before debugging from scratch
-- Run `/ingest` after solving any non-trivial problem
+- Run `/camp-bug <error>` before debugging from scratch
+- Run `/camp-ingest` after solving any non-trivial problem
 
 ## Before Committing
 - Verify build succeeds

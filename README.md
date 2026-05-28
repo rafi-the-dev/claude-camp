@@ -20,12 +20,14 @@ The Global Wiki is your personal knowledge graph. The Project Wiki is project-sp
 Global Wiki (Obsidian vault)
 ├── index.md              ← hub catalog
 ├── about-me.md           ← personal hub (AI fills in)
-├── profile.md           ← preferences (AI fills in)
-├── debugging/            ← bug solutions (global)
-├── patterns/            ← reusable patterns (global)
+├── profile.md            ← preferences (AI fills in)
+├── debugging.md          ← bug solutions hub (links to debugging/ entries)
+├── patterns.md           ← reusable patterns hub (links to patterns/ entries)
+├── debugging/            ← bug solution entries (global)
+├── patterns/             ← reusable pattern entries (global)
 └── projects/
-    ├── my-projects.md   ← project hub
-    └── project-name.md  ← pointer to project_wiki/
+    ├── my-projects.md    ← project hub
+    └── project-name.md   ← pointer to project_wiki/
 
 Project Wiki (in each project directory)
 └── project_wiki/
@@ -35,17 +37,18 @@ Project Wiki (in each project directory)
     ├── architecture.md   ← structure, components, data flow
     ├── decisions.md      ← decisions + rationale
     ├── progress.md       ← current state + session log
-    └── ideas.md          ← brainstorming and future ideas
+    ├── ideas.md          ← brainstorming and future ideas
+    └── checkpoints/      ← session checkpoints (created by /camp-checkpoint)
 ```
 
 ### It's Autonomous
 
 Camp is designed to be 100% automatic. Once installed, Claude Code handles everything through auto-triggers in your CLAUDE.md:
 
-- Starting a new project? `/project-init` runs automatically
-- Encountered a bug? `/bug` checks past solutions first
+- Starting a new project? `/camp-project-init` runs automatically
+- Encountered a bug? `/camp-bug` checks past solutions first
 - Made a decision? Add it to `decisions.md` immediately
-- Ending a session? `/end` saves everything
+- Ending a session? `/camp-end` saves everything
 
 You never manually run wiki commands. The AI does it.
 
@@ -99,13 +102,23 @@ camp init
 This will ask you:
 - Where to create the Obsidian vault (default: `~/obsidian/My-LLM-Wiki`)
 - Where to store the project-wiki template (default: `~/project-wiki-template`)
-- Whether to merge the wiki section into `~/CLAUDE.md` or create a separate `~/CAMP.md`
+- Whether to merge the wiki section into `~/CLAUDE.md` or split it into `~/CAMP.md`
 - Your name (for the about-me page, AI fills in the rest)
+
+### Merge vs Split
+
+| Mode | What happens | CLAUDE.md |
+|------|-------------|-----------|
+| **Merge** (default) | Wiki section appended directly to `~/CLAUDE.md` | Contains full wiki instructions |
+| **Split** | Wiki section goes in `~/CAMP.md` | Gets a reference line: "Read ~/CAMP.md for wiki instructions" |
+
+Both modes work — Claude Code reads `~/CLAUDE.md` automatically. In split mode, that reference line tells it to also read `CAMP.md`.
 
 **Non-interactive mode** (for CI/scripts):
 
 ```bash
-camp init --yes
+camp init --yes          # merge mode
+camp init --split        # split mode
 ```
 
 ## CLI Commands
@@ -113,25 +126,38 @@ camp init --yes
 | Command | Description |
 |---------|-------------|
 | `camp init` | Interactive setup |
-| `camp init --yes` | Non-interactive setup with defaults |
+| `camp init --yes` | Non-interactive setup (merge mode) |
+| `camp init --split` | Non-interactive setup (split mode — wiki in ~/CAMP.md) |
 | `camp config` | View current configuration |
 | `camp doctor` | Check system health |
 
-## Wiki Slash Commands (9)
+## Wiki Slash Commands (11)
 
-Once installed, these slash commands are available in Claude Code:
+All commands use the `/camp-` prefix for namespace clarity:
 
 | Command | Purpose |
 |---------|---------|
-| `/bug <error>` | Search past debugging solutions |
-| `/find <topic>` | Search the entire wiki |
-| `/ingest <source>` | Save knowledge to the wiki |
-| `/wiki-lint` | Health check: broken links, orphans |
-| `/wiki-resume` | Load or create project context |
-| `/project-init` | Initialize a new project |
-| `/project-init-ns` | Fresh init — reads codebase from scratch |
-| `/dream` | Clean up and maintain everything |
-| `/end` | Session wrap-up: save, update, verify |
+| `/camp-bug <error>` | Search past debugging solutions |
+| `/camp-find <topic>` | Search the entire wiki |
+| `/camp-ingest <source>` | Save knowledge to the wiki |
+| `/camp-lint` | Health check: broken links, orphans |
+| `/camp-resume` | Load or create project context |
+| `/camp-project-init` | Initialize a new project |
+| `/camp-project-init-ns` | Fresh init — reads codebase from scratch |
+| `/camp-dream` | Clean up and maintain everything |
+| `/camp-end` | Session wrap-up: save, update, verify |
+| `/camp-checkpoint <name>` | Save a session checkpoint |
+| `/camp-checkpoint-resume <name>` | Resume a saved checkpoint (lists all if no name) |
+
+### Session Checkpoints
+
+Checkpoints let you save your progress mid-session and resume it later in a new context window:
+
+- `/camp-checkpoint bugfix-auth` — saves current task, progress, decisions, and next steps
+- `/camp-checkpoint-resume bugfix-auth` — loads that checkpoint and briefs you on where you left off
+- `/camp-checkpoint-resume` — lists all available checkpoints if you don't specify a name
+
+Checkpoints are stored in `project_wiki/checkpoints/` and include: current task, what's done, what's in progress, next steps, key decisions, and files modified.
 
 ### Auto-Triggers
 
@@ -139,12 +165,14 @@ You don't need to run these manually. CLAUDE.md auto-triggers them:
 
 | Situation | What happens |
 |-----------|-------------|
-| You start a new project | `/project-init` runs |
-| You start a session | `/wiki-resume` loads context |
-| You encounter a bug | `/bug` checks past solutions |
-| You solve a bug | `/ingest` saves the solution |
+| You start a new project | `/camp-project-init` runs |
+| You start a session | `/camp-resume` loads context |
+| You encounter a bug | `/camp-bug` checks past solutions |
+| You solve a bug | `/camp-ingest` saves the solution |
 | You make a decision | `decisions.md` gets updated |
-| You end a session | `/end` saves everything |
+| You end a session | `/camp-end` saves everything |
+| You want to save mid-session progress | `/camp-checkpoint` saves state |
+| You resume from a checkpoint | `/camp-checkpoint-resume` loads context |
 
 ## What Gets Installed
 
@@ -154,10 +182,11 @@ After `camp init`:
 ~/.camp/config.json                         ← camp configuration
 ~/obsidian/My-LLM-Wiki/                     ← Obsidian vault (global wiki)
   ├── index.md, about-me.md, profile.md    ← seed pages
+  ├── debugging.md, patterns.md            ← hub pages
   ├── debugging/, patterns/, projects/      ← wiki directories
   └── projects/my-projects.md, _template.md ← project hub + template
 ~/project-wiki-template/                    ← 7 template files for new projects
-~/.claude/commands/                         ← 9 wiki slash commands
+~/.claude/commands/                         ← 11 wiki slash commands
 ~/CLAUDE.md                                 ← wiki section (merge mode)
 ```
 
@@ -198,7 +227,7 @@ docker build -f Dockerfile.test -t camp-test .
 docker run --rm camp-test
 ```
 
-All 43 checks should pass.
+All 56 checks should pass.
 
 ## Customization
 

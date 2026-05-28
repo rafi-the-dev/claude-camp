@@ -25,11 +25,11 @@ Read and process every page in the My-LLM-Wiki vault:
 ## Step 2 — Discover ALL project paths
 
 1. Read the my-projects hub: `obsidian read path="projects/my-projects.md"`
-2. For each project listed under "## Active Projects" (lines matching `- [[projects/...]]`), read that project page
-3. Extract the `## Project Wiki` path from each project page — it looks like:
-   `Local project context lives at: /path/to/project/project_wiki/`
-4. Collect all discovered paths into a list
-5. Also check "## Completed / Archived" projects
+2. For each project listed under "## Active Projects" (lines matching `- [[projects/...]]`):
+   - If the entry includes a `→` arrow with a path (e.g. `- [[projects/my-app]] — description → /path/to/project/project_wiki/`), extract that path directly
+   - If no arrow path, read that project page and extract the `## Project Wiki` path — it looks like: `Local project context lives at: /path/to/project/project_wiki/`
+3. Collect all discovered paths into a list
+4. Also check "## Completed / Archived" projects
 
 ## Step 3 — Clean up ALL project wikis + sync vault pages
 

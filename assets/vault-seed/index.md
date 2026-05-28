@@ -10,6 +10,8 @@ updated: YYYY-MM-DD
 ## Hubs
 - [[about-me]] — who I am, skills, goals, how I learn (links to [[profile]])
 - [[projects/my-projects]] — all projects (each project page links from here)
+- [[debugging]] — bug solutions (global, linked from projects)
+- [[patterns]] — reusable patterns (global, linked from projects)
 
 ---
 

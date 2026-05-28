@@ -98,9 +98,15 @@ checkNoFile('research/ai-papers/ does NOT exist', path.join(VAULT, 'research', '
 checkFile('index.md', path.join(VAULT, 'index.md'));
 checkFile('about-me.md', path.join(VAULT, 'about-me.md'));
 checkFile('profile.md', path.join(VAULT, 'profile.md'));
+checkFile('debugging.md hub', path.join(VAULT, 'debugging.md'));
+checkFile('patterns.md hub', path.join(VAULT, 'patterns.md'));
 checkFile('projects/my-projects.md', path.join(VAULT, 'projects', 'my-projects.md'));
 checkFile('projects/_template.md', path.join(VAULT, 'projects', '_template.md'));
 checkNoFile('research/how-i-understood-things.md', path.join(VAULT, 'research', 'how-i-understood-things.md'));
+
+// Index includes debugging and patterns hubs
+checkContent('index.md links to debugging hub', path.join(VAULT, 'index.md'), '[[debugging]]');
+checkContent('index.md links to patterns hub', path.join(VAULT, 'index.md'), '[[patterns]]');
 
 // No personal content
 checkNoContent('No hardcoded names in index.md', path.join(VAULT, 'index.md'), 'rafi');
@@ -120,28 +126,39 @@ checkFile('template ideas.md', path.join(TEMPLATE, 'ideas.md'));
 // Template paths replaced
 checkNoContent('template project.md has real path', path.join(TEMPLATE, 'project.md'), '{{VAULT_PATH}}');
 
-// Wiki commands (all 9)
-const cmds = ['bug.md', 'find.md', 'ingest.md', 'wiki-lint.md',
-  'wiki-resume.md', 'project-init.md', 'project-init-ns.md', 'dream.md', 'end.md'];
+// Wiki commands (all 11, with camp- prefix)
+const cmds = ['camp-bug.md', 'camp-find.md', 'camp-ingest.md', 'camp-lint.md',
+  'camp-resume.md', 'camp-project-init.md', 'camp-project-init-ns.md',
+  'camp-dream.md', 'camp-end.md',
+  'camp-checkpoint.md', 'camp-checkpoint-resume.md'];
 for (const cmd of cmds) {
   checkFile(cmd, path.join(COMMANDS, cmd));
 }
 
-// Commands have real paths
-checkNoContent('bug.md has real vault path', path.join(COMMANDS, 'bug.md'), '{{VAULT_PATH}}');
-checkNoContent('project-init.md has real template path', path.join(COMMANDS, 'project-init.md'), '{{TEMPLATE_PATH}}');
+// Commands have real paths (no placeholders)
+checkNoContent('camp-bug.md has real vault path', path.join(COMMANDS, 'camp-bug.md'), '{{VAULT_PATH}}');
+checkNoContent('camp-project-init.md has real template path', path.join(COMMANDS, 'camp-project-init.md'), '{{TEMPLATE_PATH}}');
+checkNoContent('camp-checkpoint.md has real paths', path.join(COMMANDS, 'camp-checkpoint.md'), '{{VAULT_PATH}}');
+checkNoContent('camp-checkpoint-resume.md has real paths', path.join(COMMANDS, 'camp-checkpoint-resume.md'), '{{VAULT_PATH}}');
+
+// Commands use /camp- prefix (no old-style references)
+checkNoContent('No old /bug reference in camp-end.md', path.join(COMMANDS, 'camp-end.md'), '`/ingest`');
+checkNoContent('No old /wiki-resume reference in camp-project-init.md', path.join(COMMANDS, 'camp-project-init.md'), '`/wiki-resume`');
+checkNoContent('No old /wiki-resume reference in camp-project-init-ns.md', path.join(COMMANDS, 'camp-project-init-ns.md'), '`/wiki-resume`');
 
 // CLAUDE.md
 checkFile('CLAUDE.md exists', CLAUDE_MD);
 checkContent('CLAUDE.md has LLM Wiki section', CLAUDE_MD, 'LLM Wiki');
 checkNoContent('CLAUDE.md has no placeholders', CLAUDE_MD, '{{VAULT_PATH}}');
+checkContent('CLAUDE.md has camp-bug command', CLAUDE_MD, '/camp-bug');
+checkContent('CLAUDE.md has camp-checkpoint command', CLAUDE_MD, '/camp-checkpoint');
 
 // _template.md has {{PROJECT_PATH}} placeholder
 checkContent('_template.md has PROJECT_PATH placeholder', path.join(VAULT, 'projects', '_template.md'), '{{PROJECT_PATH}}');
 
 // No research references in commands
-checkNoContent('No how-i-understood in dream.md', path.join(COMMANDS, 'dream.md'), 'how-i-understood');
-checkNoContent('No research/ai-papers in ingest.md', path.join(COMMANDS, 'ingest.md'), 'research/ai-papers');
+checkNoContent('No how-i-understood in camp-dream.md', path.join(COMMANDS, 'camp-dream.md'), 'how-i-understood');
+checkNoContent('No research/ai-papers in camp-ingest.md', path.join(COMMANDS, 'camp-ingest.md'), 'research/ai-papers');
 
 // Summary
 console.log('\n==========================================');

@@ -11,9 +11,9 @@ Summarize what was done: bugs fixed, decisions made, patterns learned, features 
 ## Step 2 — Save any unsaved knowledge
 
 For each item from Step 1, ask: should this be in the wiki?
-- Debugging solution? → `/ingest` it
-- Architectural decision? → add to `project_wiki/decisions.md` or `/ingest` it
-- New pattern learned? → `/ingest` it
+- Debugging solution? → `/camp-ingest` it
+- Architectural decision? → add to `project_wiki/decisions.md` or `/camp-ingest` it
+- New pattern learned? → `/camp-ingest` it
 
 If there's nothing worth saving, skip this step.
 

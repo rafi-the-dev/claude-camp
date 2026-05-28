@@ -63,11 +63,15 @@ Use: `obsidian create path="projects/[project-name]" content="..."`
 Then update my-projects hub:
 Run: `obsidian read path="projects/my-projects.md"`
 Add under "## Active Projects":
-`- [[projects/[project-name]]] — one-line description`
+`- [[projects/[project-name]]] — one-line description → /absolute/path/to/project/project_wiki/`
+
+The `→` arrow followed by the project_wiki path lets you quickly locate and read project context from the hub page.
 
 ### If page already exists: update it
 
 Read the current page. Compare against the template — if any sections are missing, add them. Then update content. Vault page is a pointer — don't duplicate project_wiki content.
+
+Also update the project's entry in my-projects.md — make sure the `→ /path/to/project_wiki/` pointer is accurate.
 
 ## Step 4 — Present a complete briefing
 
@@ -86,7 +90,7 @@ Read the current page. Compare against the template — if any sections are miss
 **Main wiki:** [[projects/[project-name]]] created/updated from [[projects/_template]]
 Added/updated under [[projects/my-projects]]
 
-Run `/wiki-resume` at the start of future sessions to load context.
+Run `/camp-resume` at the start of future sessions to load context.
 ```
 
 ## Important Rules
