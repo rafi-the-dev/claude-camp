@@ -160,6 +160,41 @@ checkContent('_template.md has PROJECT_PATH placeholder', path.join(VAULT, 'proj
 checkNoContent('No how-i-understood in camp-dream.md', path.join(COMMANDS, 'camp-dream.md'), 'how-i-understood');
 checkNoContent('No research/ai-papers in camp-ingest.md', path.join(COMMANDS, 'camp-ingest.md'), 'research/ai-papers');
 
+// ==========================================
+// Phase 2: Test uninstall --yes
+// ==========================================
+console.log('\n>>> Running: camp uninstall --yes\n');
+try {
+  execFileSync('camp', ['uninstall', '--yes'], { stdio: 'inherit' });
+} catch (e) {
+  console.error('camp uninstall failed:', e.message);
+  process.exit(1);
+}
+
+console.log('\n==========================================');
+console.log('  Verifying Uninstallation');
+console.log('==========================================\n');
+
+// Commands should be gone
+for (const cmd of cmds) {
+  checkNoFile(`Command ${cmd} removed`, path.join(COMMANDS, cmd));
+}
+
+// Config should be gone
+checkNoFile('Config removed', CONFIG_FILE);
+
+// CLAUDE.md: if it still exists, it should not contain the wiki section
+// (it may be removed entirely if it only had the wiki section)
+if (fs.existsSync(CLAUDE_MD)) {
+  checkNoContent('CLAUDE.md has no LLM Wiki section', CLAUDE_MD, 'LLM Wiki');
+} else {
+  checkNoFile('CLAUDE.md removed (was wiki-only)', CLAUDE_MD);
+}
+
+// Vault and template should still exist (data safety)
+check('Vault still exists (preserved)', () => fs.existsSync(VAULT));
+check('Template still exists (preserved)', () => fs.existsSync(TEMPLATE));
+
 // Summary
 console.log('\n==========================================');
 if (FAIL === 0) {

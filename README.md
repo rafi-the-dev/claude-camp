@@ -130,6 +130,30 @@ camp init --split        # split mode
 | `camp init --split` | Non-interactive setup (split mode — wiki in ~/CAMP.md) |
 | `camp config` | View current configuration |
 | `camp doctor` | Check system health |
+| `camp uninstall` | Interactive uninstall |
+| `camp uninstall --yes` | Non-interactive uninstall (keeps vault and template) |
+
+## Uninstall
+
+```bash
+camp uninstall
+```
+
+This walks you through removing Camp artifacts:
+
+1. **Wiki commands** — removes the 11 `camp-*.md` files from `~/.claude/commands/`
+2. **CLAUDE.md/CAMP.md** — removes the wiki section (merge mode) or CAMP.md + reference (split mode)
+3. **Config file** — removes `~/.camp/config.json`
+4. **Vault directory** — optional, since it contains your data (`~/obsidian/My-LLM-Wiki/`)
+5. **Template directory** — optional (`~/project-wiki-template/`)
+
+Each item asks for confirmation. The vault and template default to **keep** to protect your data.
+
+**Non-interactive mode** removes commands, CLAUDE.md section, and config, but keeps the vault and template:
+
+```bash
+camp uninstall --yes
+```
 
 ## Wiki Slash Commands (11)
 
@@ -227,7 +251,7 @@ docker build -f Dockerfile.test -t camp-test .
 docker run --rm camp-test
 ```
 
-All 56 checks should pass.
+All 62 checks should pass.
 
 ## Customization
 

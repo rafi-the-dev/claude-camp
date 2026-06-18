@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.0
+
+### New Features
+
+- **`camp uninstall`** — Interactive uninstall that walks you through removing Camp artifacts (commands, CLAUDE.md section, config, vault, template) with per-item confirmation
+- **`camp uninstall --yes`** — Non-interactive uninstall that removes commands, CLAUDE.md section, and config, but keeps vault and template to preserve your data
+- 62 test checks (up from 56) covering init → uninstall round-trip
+
 ## v1.1.0
 
 ### New Features

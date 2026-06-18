@@ -3,6 +3,7 @@
 const { init } = require('../lib/init');
 const { showConfig } = require('../lib/config');
 const { doctor } = require('../lib/obsidian');
+const { uninstall } = require('../lib/uninstall');
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -21,6 +22,11 @@ switch (command) {
   case 'doctor':
     doctor();
     break;
+  case 'uninstall':
+    uninstall({
+      yes: flags.includes('--yes') || flags.includes('-y'),
+    });
+    break;
   case undefined:
   case '--help':
   case '-h':
@@ -28,11 +34,13 @@ switch (command) {
 camp — Claude Autonomous Memory Pipeline
 
 Usage:
-  camp init           Interactive setup
-  camp init --yes     Non-interactive (use defaults, merge mode)
-  camp init --split   Non-interactive (use defaults, split mode)
-  camp config         View current configuration
-  camp doctor         Check system health
+  camp init             Interactive setup
+  camp init --yes       Non-interactive (use defaults, merge mode)
+  camp init --split     Non-interactive (use defaults, split mode)
+  camp config           View current configuration
+  camp doctor           Check system health
+  camp uninstall        Interactive uninstall
+  camp uninstall --yes  Non-interactive (keeps vault and template)
 
 Options:
   -y, --yes    Use defaults (non-interactive)
