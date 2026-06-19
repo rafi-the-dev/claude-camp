@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/claude-camp)](https://www.npmjs.com/package/claude-camp)
 [![license](https://img.shields.io/npm/l/claude-camp)](https://www.npmjs.com/package/claude-camp)
 
-**C**laude **A**utonomous **M**emory **P**ipeline — a persistent knowledge base for Claude Code that maintains a structured wiki across sessions using Obsidian as the viewer and slash commands as the interface.
+**C**laude **A**utonomous **M**emory **P**ipeline — a persistent knowledge base for **Claude Code** and the **Pi coding agent** that maintains a structured wiki across sessions using Obsidian as the viewer and slash commands as the interface.
 
 ## How It Works
 
@@ -55,7 +55,7 @@ You never manually run wiki commands. The AI does it.
 ## Requirements
 
 - **Node.js 18+**
-- **Claude Code** (Anthropic's CLI)
+- A supported coding agent: **Claude Code** (Anthropic's CLI) **or** the **Pi coding agent** ([earendil-works/pi](https://github.com/earendil-works/pi))
 - **Obsidian v1.12+** with CLI enabled
 - **Obsidian CLI Skill** — [github.com/pablo-mano/Obsidian-CLI-skill](https://github.com/pablo-mano/Obsidian-CLI-skill)
 
@@ -102,8 +102,29 @@ camp init
 This will ask you:
 - Where to create the Obsidian vault (default: `~/obsidian/My-LLM-Wiki`)
 - Where to store the project-wiki template (default: `~/project-wiki-template`)
-- Whether to merge the wiki section into `~/CLAUDE.md` or split it into `~/CAMP.md`
+- **Which coding agent** to install for: `claude` (default) or `pi`
+- Whether to merge the wiki section into the agent's instructions file or split it into a separate file
 - Your name (for the about-me page, AI fills in the rest)
+
+### Choosing an agent
+
+Camp installs the same wiki content for either agent — only the install locations and the slash-command argument syntax differ:
+
+| | Claude Code | Pi |
+|---|---|---|
+| Commands / prompts | `~/.claude/commands/*.md` | `~/.pi/agent/prompts/*.md` |
+| Instructions (merge) | `~/CLAUDE.md` | `~/.pi/agent/AGENTS.md` |
+| Instructions (split) | `~/CAMP.md` | `~/.pi/agent/CAMP.md` |
+| Argument token | `$ARGUMENTS` | `$@` |
+
+Pick non-interactively with a flag:
+
+```bash
+camp init --yes --claude   # Claude Code (default)
+camp init --yes --pi       # Pi coding agent
+```
+
+The chosen agent is saved in `~/.camp/config.json`, so `camp doctor`, `camp config`, and `camp uninstall` all target the right locations automatically.
 
 ### Merge vs Split
 
@@ -127,7 +148,9 @@ camp init --split        # split mode
 |---------|-------------|
 | `camp init` | Interactive setup |
 | `camp init --yes` | Non-interactive setup (merge mode) |
-| `camp init --split` | Non-interactive setup (split mode — wiki in ~/CAMP.md) |
+| `camp init --split` | Non-interactive setup (split mode — wiki in a separate file) |
+| `camp init --pi` | Install for the Pi coding agent (`~/.pi/agent`) |
+| `camp init --claude` | Install for Claude Code (default) |
 | `camp config` | View current configuration |
 | `camp doctor` | Check system health |
 | `camp uninstall` | Interactive uninstall |
@@ -200,18 +223,18 @@ You don't need to run these manually. CLAUDE.md auto-triggers them:
 
 ## What Gets Installed
 
-After `camp init`:
+After `camp init` (Claude Code target shown; Pi paths in parentheses):
 
 ```
-~/.camp/config.json                         ← camp configuration
+~/.camp/config.json                         ← camp configuration (records the agent)
 ~/obsidian/My-LLM-Wiki/                     ← Obsidian vault (global wiki)
   ├── index.md, about-me.md, profile.md    ← seed pages
   ├── debugging.md, patterns.md            ← hub pages
   ├── debugging/, patterns/, projects/      ← wiki directories
   └── projects/my-projects.md, _template.md ← project hub + template
 ~/project-wiki-template/                    ← 7 template files for new projects
-~/.claude/commands/                         ← 11 wiki slash commands
-~/CLAUDE.md                                 ← wiki section (merge mode)
+~/.claude/commands/                         ← 11 wiki slash commands  (Pi: ~/.pi/agent/prompts/)
+~/CLAUDE.md                                 ← wiki section (merge mode) (Pi: ~/.pi/agent/AGENTS.md)
 ```
 
 ## Cross-Platform
@@ -251,7 +274,7 @@ docker build -f Dockerfile.test -t camp-test .
 docker run --rm camp-test
 ```
 
-All 62 checks should pass.
+All checks should pass (Claude Code round-trip + Pi round-trip).
 
 ## Customization
 

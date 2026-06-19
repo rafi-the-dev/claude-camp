@@ -195,6 +195,76 @@ if (fs.existsSync(CLAUDE_MD)) {
 check('Vault still exists (preserved)', () => fs.existsSync(VAULT));
 check('Template still exists (preserved)', () => fs.existsSync(TEMPLATE));
 
+// ==========================================
+// Phase 3: Test Pi target (camp init --yes --pi)
+// ==========================================
+const PI_PROMPTS = path.join(os.homedir(), '.pi', 'agent', 'prompts');
+const PI_AGENTS_MD = path.join(os.homedir(), '.pi', 'agent', 'AGENTS.md');
+
+// Clean any leftover camp commands from a prior run
+if (fs.existsSync(PI_PROMPTS)) {
+  for (const cmd of cmds) {
+    const p = path.join(PI_PROMPTS, cmd);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
+  }
+}
+
+console.log('\n>>> Running: camp init --yes --pi\n');
+try {
+  execFileSync('camp', ['init', '--yes', '--pi'], { stdio: 'inherit' });
+} catch (e) {
+  console.error('camp init --pi failed:', e.message);
+  process.exit(1);
+}
+
+console.log('\n==========================================');
+console.log('  Verifying Pi Installation');
+console.log('==========================================\n');
+
+// Config records the pi agent
+checkContent('Config records agent=pi', CONFIG_FILE, '"agent": "pi"');
+
+// Commands land in ~/.pi/agent/prompts (not ~/.claude/commands)
+for (const cmd of cmds) {
+  checkFile(`Pi prompt ${cmd}`, path.join(PI_PROMPTS, cmd));
+}
+
+// $ARGUMENTS is translated to Pi's $@ syntax
+checkContent('Pi camp-bug.md uses $@', path.join(PI_PROMPTS, 'camp-bug.md'), '$@');
+checkNoContent('Pi camp-bug.md has no $ARGUMENTS', path.join(PI_PROMPTS, 'camp-bug.md'), '$ARGUMENTS');
+checkNoContent('Pi camp-bug.md has real vault path', path.join(PI_PROMPTS, 'camp-bug.md'), '{{VAULT_PATH}}');
+
+// Wiki section goes into ~/.pi/agent/AGENTS.md (merge mode)
+checkFile('AGENTS.md exists', PI_AGENTS_MD);
+checkContent('AGENTS.md has LLM Wiki section', PI_AGENTS_MD, 'LLM Wiki');
+checkContent('AGENTS.md has camp-bug command', PI_AGENTS_MD, '/camp-bug');
+
+// Claude Code locations are NOT touched by a Pi install
+checkNoFile('Pi install did not write ~/CLAUDE.md', CLAUDE_MD);
+
+console.log('\n>>> Running: camp uninstall --yes (pi)\n');
+try {
+  execFileSync('camp', ['uninstall', '--yes'], { stdio: 'inherit' });
+} catch (e) {
+  console.error('camp uninstall (pi) failed:', e.message);
+  process.exit(1);
+}
+
+console.log('\n==========================================');
+console.log('  Verifying Pi Uninstallation');
+console.log('==========================================\n');
+
+for (const cmd of cmds) {
+  checkNoFile(`Pi prompt ${cmd} removed`, path.join(PI_PROMPTS, cmd));
+}
+checkNoFile('Config removed (pi)', CONFIG_FILE);
+if (fs.existsSync(PI_AGENTS_MD)) {
+  checkNoContent('AGENTS.md has no LLM Wiki section', PI_AGENTS_MD, 'LLM Wiki');
+} else {
+  checkNoFile('AGENTS.md removed (was wiki-only)', PI_AGENTS_MD);
+}
+check('Vault still exists after pi round-trip', () => fs.existsSync(VAULT));
+
 // Summary
 console.log('\n==========================================');
 if (FAIL === 0) {

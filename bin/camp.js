@@ -14,6 +14,7 @@ switch (command) {
     init({
       yes: flags.includes('--yes') || flags.includes('-y'),
       split: flags.includes('--split') || flags.includes('-s'),
+      agent: flags.includes('--pi') ? 'pi' : (flags.includes('--claude') ? 'claude' : undefined),
     });
     break;
   case 'config':
@@ -37,6 +38,8 @@ Usage:
   camp init             Interactive setup
   camp init --yes       Non-interactive (use defaults, merge mode)
   camp init --split     Non-interactive (use defaults, split mode)
+  camp init --pi        Install for the Pi coding agent (~/.pi/agent)
+  camp init --claude    Install for Claude Code (default)
   camp config           View current configuration
   camp doctor           Check system health
   camp uninstall        Interactive uninstall
@@ -44,7 +47,9 @@ Usage:
 
 Options:
   -y, --yes    Use defaults (non-interactive)
-  -s, --split  Split mode: wiki section in ~/CAMP.md, reference in ~/CLAUDE.md
+  -s, --split  Split mode: wiki section in a separate file, referenced from the main one
+      --pi     Target the Pi coding agent (prompts in ~/.pi/agent/prompts, AGENTS.md)
+      --claude Target Claude Code (commands in ~/.claude/commands, CLAUDE.md) [default]
   -h, --help   Show this help
 `);
     break;
