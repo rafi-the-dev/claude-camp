@@ -4,10 +4,11 @@
 
 ### New Features
 
-- **Multi-agent install target** — `camp init` can now install for either **Claude Code** or the **Pi coding agent**. Pick interactively ("Which coding agent? (claude/pi)") or non-interactively with `camp init --pi` / `camp init --claude` (default).
+- **`camp update`** — refreshes the installed tooling (slash commands + the `## LLM Wiki` instructions section) for **every configured agent**, to the latest shipped version, **without modifying or deleting any wikis**. The Obsidian vault content (`debugging/`, `patterns/`, `projects/` pages, seed pages) and every `project_wiki/` are left untouched, and any of your own content above the instructions section is preserved. `camp update --templates` additionally refreshes the project-wiki and vault page templates.
+- **Multi-agent install** — `camp init` can install for **one or both** of **Claude Code** and the **Pi coding agent**. Pick interactively ("Which coding agent(s)? (claude, pi, or both)") or non-interactively with `camp init --claude`, `--pi`, or `--all`.
   - **Claude Code**: commands in `~/.claude/commands/`, instructions in `~/CLAUDE.md`, arguments as `$ARGUMENTS`.
   - **Pi**: prompt templates in `~/.pi/agent/prompts/`, instructions in `~/.pi/agent/AGENTS.md`, arguments translated to Pi's `$@` syntax.
-- The chosen agent is stored in `~/.camp/config.json` (`"agent"`), so `camp doctor`, `camp config`, and `camp uninstall` all operate on the correct locations automatically.
+- The selected agents are stored in `~/.camp/config.json` (`"agents": [...]`), so `camp update`, `camp doctor`, `camp config`, and `camp uninstall` all operate on every configured agent automatically. Legacy single-`agent` configs are read transparently.
 
 ### Fixes
 

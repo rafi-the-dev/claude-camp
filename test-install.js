@@ -161,6 +161,43 @@ checkNoContent('No how-i-understood in camp-dream.md', path.join(COMMANDS, 'camp
 checkNoContent('No research/ai-papers in camp-ingest.md', path.join(COMMANDS, 'camp-ingest.md'), 'research/ai-papers');
 
 // ==========================================
+// Phase 1b: Test update (refresh tooling, preserve wikis)
+// ==========================================
+console.log('\n>>> Simulating user edits, then running: camp update\n');
+
+// User-customized content above the wiki section + filled-in vault data
+const claudeBefore = fs.readFileSync(CLAUDE_MD, 'utf8');
+fs.writeFileSync(CLAUDE_MD, '# My personal rules\nAlways be concise.\n\n' + claudeBefore);
+const ABOUT_ME = path.join(VAULT, 'about-me.md');
+const USER_DEBUG = path.join(VAULT, 'debugging', 'user-bug.md');
+fs.writeFileSync(ABOUT_ME, 'I am the user. I love Rust.\n');
+fs.writeFileSync(USER_DEBUG, 'a solved bug entry\n');
+// Tamper a command so we can prove update overwrites it
+fs.writeFileSync(path.join(COMMANDS, 'camp-bug.md'), 'STALE\n');
+
+try {
+  execFileSync('camp', ['update'], { stdio: 'inherit' });
+} catch (e) {
+  console.error('camp update failed:', e.message);
+  process.exit(1);
+}
+
+console.log('\n==========================================');
+console.log('  Verifying Update');
+console.log('==========================================\n');
+
+// Tooling refreshed
+checkNoContent('update overwrote stale camp-bug.md', path.join(COMMANDS, 'camp-bug.md'), 'STALE');
+checkContent('update restored camp-bug.md body', path.join(COMMANDS, 'camp-bug.md'), '$ARGUMENTS');
+check('update kept exactly one LLM Wiki section', () =>
+  (fs.readFileSync(CLAUDE_MD, 'utf8').match(/## LLM Wiki/g) || []).length === 1);
+
+// User content preserved
+checkContent('update preserved user CLAUDE.md header', CLAUDE_MD, 'My personal rules');
+checkContent('update preserved about-me.md content', ABOUT_ME, 'I love Rust');
+checkFile('update preserved user debugging entry', USER_DEBUG);
+
+// ==========================================
 // Phase 2: Test uninstall --yes
 // ==========================================
 console.log('\n>>> Running: camp uninstall --yes\n');
@@ -221,8 +258,10 @@ console.log('\n==========================================');
 console.log('  Verifying Pi Installation');
 console.log('==========================================\n');
 
-// Config records the pi agent
-checkContent('Config records agent=pi', CONFIG_FILE, '"agent": "pi"');
+// Config records the pi agent (in the agents array)
+checkContent('Config has agents array', CONFIG_FILE, '"agents"');
+checkContent('Config records pi agent', CONFIG_FILE, '"pi"');
+checkNoContent('Config does not record claude agent', CONFIG_FILE, '"claude"');
 
 // Commands land in ~/.pi/agent/prompts (not ~/.claude/commands)
 for (const cmd of cmds) {
@@ -240,7 +279,7 @@ checkContent('AGENTS.md has LLM Wiki section', PI_AGENTS_MD, 'LLM Wiki');
 checkContent('AGENTS.md has camp-bug command', PI_AGENTS_MD, '/camp-bug');
 
 // Claude Code locations are NOT touched by a Pi install
-checkNoFile('Pi install did not write ~/CLAUDE.md', CLAUDE_MD);
+checkNoContent('Pi install added no wiki section to ~/CLAUDE.md', CLAUDE_MD, 'LLM Wiki');
 
 console.log('\n>>> Running: camp uninstall --yes (pi)\n');
 try {
@@ -264,6 +303,64 @@ if (fs.existsSync(PI_AGENTS_MD)) {
   checkNoFile('AGENTS.md removed (was wiki-only)', PI_AGENTS_MD);
 }
 check('Vault still exists after pi round-trip', () => fs.existsSync(VAULT));
+
+// ==========================================
+// Phase 4: Test multi-agent install (camp init --yes --all)
+// ==========================================
+if (fs.existsSync(PI_PROMPTS)) {
+  for (const cmd of cmds) {
+    const p = path.join(PI_PROMPTS, cmd);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
+  }
+}
+if (fs.existsSync(CLAUDE_MD)) fs.unlinkSync(CLAUDE_MD);
+
+console.log('\n>>> Running: camp init --yes --all\n');
+try {
+  execFileSync('camp', ['init', '--yes', '--all'], { stdio: 'inherit' });
+} catch (e) {
+  console.error('camp init --all failed:', e.message);
+  process.exit(1);
+}
+
+console.log('\n==========================================');
+console.log('  Verifying Multi-Agent Installation');
+console.log('==========================================\n');
+
+checkContent('Config records claude agent', CONFIG_FILE, '"claude"');
+checkContent('Config records pi agent (multi)', CONFIG_FILE, '"pi"');
+
+// Both command locations populated
+checkFile('Claude camp-bug.md installed', path.join(COMMANDS, 'camp-bug.md'));
+checkFile('Pi camp-bug.md installed', path.join(PI_PROMPTS, 'camp-bug.md'));
+
+// Each uses its own argument syntax
+checkContent('Claude command uses $ARGUMENTS', path.join(COMMANDS, 'camp-bug.md'), '$ARGUMENTS');
+checkContent('Pi command uses $@', path.join(PI_PROMPTS, 'camp-bug.md'), '$@');
+checkNoContent('Pi command has no $ARGUMENTS', path.join(PI_PROMPTS, 'camp-bug.md'), '$ARGUMENTS');
+
+// Both instructions files carry the wiki section
+checkContent('CLAUDE.md has wiki section (multi)', CLAUDE_MD, 'LLM Wiki');
+checkContent('AGENTS.md has wiki section (multi)', PI_AGENTS_MD, 'LLM Wiki');
+
+console.log('\n>>> Running: camp uninstall --yes (multi-agent)\n');
+try {
+  execFileSync('camp', ['uninstall', '--yes'], { stdio: 'inherit' });
+} catch (e) {
+  console.error('camp uninstall (multi) failed:', e.message);
+  process.exit(1);
+}
+
+console.log('\n==========================================');
+console.log('  Verifying Multi-Agent Uninstallation');
+console.log('==========================================\n');
+
+checkNoFile('Claude camp-bug.md removed (multi)', path.join(COMMANDS, 'camp-bug.md'));
+checkNoFile('Pi camp-bug.md removed (multi)', path.join(PI_PROMPTS, 'camp-bug.md'));
+checkNoFile('Config removed (multi)', CONFIG_FILE);
+if (fs.existsSync(CLAUDE_MD)) checkNoContent('CLAUDE.md wiki section removed (multi)', CLAUDE_MD, 'LLM Wiki');
+if (fs.existsSync(PI_AGENTS_MD)) checkNoContent('AGENTS.md wiki section removed (multi)', PI_AGENTS_MD, 'LLM Wiki');
+check('Vault still exists after multi round-trip', () => fs.existsSync(VAULT));
 
 // Summary
 console.log('\n==========================================');

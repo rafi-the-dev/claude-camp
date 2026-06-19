@@ -102,13 +102,13 @@ camp init
 This will ask you:
 - Where to create the Obsidian vault (default: `~/obsidian/My-LLM-Wiki`)
 - Where to store the project-wiki template (default: `~/project-wiki-template`)
-- **Which coding agent** to install for: `claude` (default) or `pi`
+- **Which coding agent(s)** to install for: `claude` (default), `pi`, or **both**
 - Whether to merge the wiki section into the agent's instructions file or split it into a separate file
 - Your name (for the about-me page, AI fills in the rest)
 
-### Choosing an agent
+### Choosing your agent(s)
 
-Camp installs the same wiki content for either agent — only the install locations and the slash-command argument syntax differ:
+Camp installs the same wiki content for any agent — only the install locations and the slash-command argument syntax differ:
 
 | | Claude Code | Pi |
 |---|---|---|
@@ -117,14 +117,17 @@ Camp installs the same wiki content for either agent — only the install locati
 | Instructions (split) | `~/CAMP.md` | `~/.pi/agent/CAMP.md` |
 | Argument token | `$ARGUMENTS` | `$@` |
 
-Pick non-interactively with a flag:
+You can install for **one or both** agents. Pick non-interactively with flags:
 
 ```bash
 camp init --yes --claude   # Claude Code (default)
 camp init --yes --pi       # Pi coding agent
+camp init --yes --all      # both (same as --claude --pi)
 ```
 
-The chosen agent is saved in `~/.camp/config.json`, so `camp doctor`, `camp config`, and `camp uninstall` all target the right locations automatically.
+Interactively, answer the agent prompt with `claude`, `pi`, `both`, or a comma list (`claude,pi`).
+
+The selected agents are saved in `~/.camp/config.json` (`"agents": [...]`), so `camp update`, `camp doctor`, `camp config`, and `camp uninstall` all operate on **every** configured agent automatically. (Configs from older single-agent installs are still read correctly.)
 
 ### Merge vs Split
 
@@ -151,10 +154,32 @@ camp init --split        # split mode
 | `camp init --split` | Non-interactive setup (split mode — wiki in a separate file) |
 | `camp init --pi` | Install for the Pi coding agent (`~/.pi/agent`) |
 | `camp init --claude` | Install for Claude Code (default) |
+| `camp init --all` | Install for both Claude Code and Pi |
+| `camp update` | Refresh commands + instructions for every configured agent (keeps wikis intact) |
+| `camp update --templates` | Also refresh the project-wiki and vault page templates |
 | `camp config` | View current configuration |
 | `camp doctor` | Check system health |
 | `camp uninstall` | Interactive uninstall |
 | `camp uninstall --yes` | Non-interactive uninstall (keeps vault and template) |
+
+## Update
+
+After upgrading the package (`npm install -g claude-camp@latest`), refresh the installed tooling:
+
+```bash
+camp update
+```
+
+This re-installs the latest slash commands and rewrites the `## LLM Wiki` instructions section — for **every** agent you originally chose (Claude Code, Pi, or both). It is **non-destructive to your knowledge**:
+
+- **Refreshed**: the `camp-*` commands and the instructions section (any of your own content *above* that section in `CLAUDE.md`/`AGENTS.md` is preserved).
+- **Preserved**: the entire Obsidian vault — `index.md`, `about-me.md`, `profile.md`, `debugging/`, `patterns/`, every `projects/` page — and every `project_wiki/` in your repos. `camp update` never reads or writes those.
+
+To also pick up improvements to the templates (overwrites any customizations in `~/project-wiki-template/` and the vault's `projects/_template.md`):
+
+```bash
+camp update --templates
+```
 
 ## Uninstall
 
